@@ -1,0 +1,190 @@
+<html>
+<head></head>
+<body>
+
+
+<styles>
+body{
+  margin:0;
+  overflow:hidden;
+}
+</styles>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js"></script> 
+<script>
+let w;
+let h;
+let p1;
+let p2;
+let particles;
+let world;
+let radius;
+
+class World{
+  constructor(){
+    this.particles = [];
+    this.text = "";
+    this.r = 10;
+  }
+  addParticle(particle){
+    this.particles.push(particle);
+  }
+  showText(){
+    textSize(32);
+    text(this.text, 10, 30);
+  }
+  draw(){
+    for(let particle of this.particles){
+      particle.draw();
+    }
+    for(let i=0; i<4; i++){
+      
+      this.update();
+      
+    }
+    this.showText();
+  }
+  update(){
+    this.collision();
+  }
+  collision(){
+//     for(let i=0; i<this.particles.length-1; i++){
+//       let d = dist(this.particles[i].x, this.particles[i].y, this.particles[i+1].x, this.particles[i+1].y);
+// //       positive means first particle is left and top of the second particle
+// //       negative means first particle 
+//       let distX = this.particles[i+1].x - this.particles[i].x;
+//       let distY = this.particles[i+1].y - this.particles[i].y;
+//       let s = 10;
+      
+//       let force = s/(d-10);
+//       let vec = createVector(distX, distY);
+//       vec.normalize();
+//       vec.mult(force);
+//       this.particles[i].acX = -vec.x;
+//       this.particles[i+1].acX = vec.x;
+//       this.particles[i].acY = -vec.y;
+//       this.particles[i+1].acY = vec.y;
+//     }
+    for(let i of this.particles){
+      i.acX = 0;
+      i.acY = 0;
+      for(let e of this.particles){
+        if(i!==e){
+          
+          // line(i.x,i.y,e.x,e.y);
+          let d = dist(i.x, i.y, e.x, e.y);
+//       positive means first particle is left and top of the second particle
+//       negative means first particle 
+      let distX = e.x - i.x;
+      let distY = e.y - i.y;
+      let s = 10;
+      let force = s/(Math.pow(d,2)*0.01-this.r)
+      // let force = s/(d-this.r);
+          if(force<0){force = -force;}
+      if(force>0.5){
+        this.text = force;
+        force = 0.5;
+      }
+          
+      let vec = createVector(distX, distY);
+      vec.normalize();
+      vec.mult(force);
+      i.acX += -vec.x;
+      e.acX += vec.x;
+      i.acY += -vec.y;
+      e.acY += vec.y;
+     
+        }//else{console.log("s")};
+      }
+    }
+        
+    for(let particle of this.particles){
+      if(particle.x<this.r/2){
+        particle.x = this.r/2;
+        particle.speedX = -particle.speedX;
+      }
+      if(particle.x>w-this.r/2){
+        particle.x = w-this.r/2;
+        particle.speedX = -particle.speedX;
+      }
+      if(particle.y<this.r/2){
+        particle.y = this.r/2;
+        particle.speedY = -particle.speedY;
+      }
+      if(particle.y>h-this.r/2){
+        particle.y = h-this.r/2;
+        particle.speedY = -particle.speedY;
+      }
+    }
+  }
+}
+class Particle{
+  constructor(x, y){
+    this.x = x || 0;
+    this.y = y || 0;
+    this.r = 100;
+    this.d = this.r*2;
+    
+    this.speedX = 0;
+    this.speedY = 0;
+    this.acX = 0;
+    this.acY = 0;
+    this.color = 0;
+    this.randomSpeed();
+  }
+  draw(){
+    push();
+    // noStroke();
+    fill(this.color);
+    circle(this.x, this.y, this.d);
+    this.update();
+    pop();
+  }
+  update(){
+    this.speedX += this.acX;
+    this.speedY += this.acY;
+    this.x += this.speedX;
+    this.y += this.speedY;
+  }
+  randomPos(){
+    this.x = randomf(0, w);
+    this.y =randomf(0, h);
+  }
+  randomSpeed(){
+    let sp = 7;
+    this.speedX = randomf(-sp, sp);
+    this.speedY = randomf(-sp, sp);
+  }
+  
+}
+function randomf(min, max){
+  return Math.random()*(max-min)+min;
+}
+function setup(){
+  w = innerWidth;
+  h = innerHeight
+  createCanvas(w, h);
+  frameRate(60);
+  world = new World();
+  r = 100;
+  world.r = r;
+  
+  for(let i=0; i<3; i++){
+    let pr = new Particle();
+    pr.color = i*60;
+    pr.d = r;
+    pr.randomPos();
+    console.log(pr.x);
+    world.addParticle(pr);
+  }
+  
+}
+
+function draw(){
+  background("gray");
+  world.draw();
+}
+</script>
+</body>
+</html>
